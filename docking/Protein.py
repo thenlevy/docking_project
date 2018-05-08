@@ -3,12 +3,12 @@ class Pdb(dict):
         super().__init__()
         self._name = name
         self._chains = []
-        self._nb_atom = 0
 
 
     def __setitem__(self, key, value):
         if key in self._chains:
-            warn_mess = "Warning, adding " + key + " which is already in " + self._name
+            warn_mess = ("Warning, adding " + key + " which is already in "
+                         + self._name)
             print(warn_mess, sys.stderr)
         else:
             self._chains.append(key)
@@ -32,11 +32,6 @@ class Pdb(dict):
             chain.write()
 
 
-    def provide_atom_num():
-        self._nb_atom += 1
-        return self._nb_atom
-        
-
 class Chain(dict):
     def __init__(self, name=""):
         super().__init__()
@@ -47,7 +42,8 @@ class Chain(dict):
 
     def __setitem__(self, key, value):
         if key in self._residual_list:
-            warn_mess = "Warning, adding " + key + " which is already in " + self._name
+            warn_mess = ("Warning, adding " + key + " which is already in "
+                         + self._name)
             print(warn_mess, sys.stderr)
         else:
             self._residual_list.append(key)
@@ -57,6 +53,7 @@ class Chain(dict):
     def add_residual(self, res_name, res):
         self.__setitem__(res_name, res)
         res.set_chain(self)
+        res.set_residual_num()
     
 
     def keys(self):
@@ -71,13 +68,17 @@ class Chain(dict):
         self._pdb = pdb
 
 
-    def provide_atom_num(self):
-        return self._pdb.provide_atom_num()
-
+    def provide_residual_num(self):
+        self._nb_atom += 1
+        return self._nb_atom
 
     def write(self):
-        print("TODO")
+        for res in self.values():
+            res.write()
 
+
+    def get_chain_ID(self):
+        return self._name
             
 
 class Residual(dict):
@@ -91,7 +92,8 @@ class Residual(dict):
 
     def __setitem__(self, key, value):
         if key in self._atom_list:
-            warn_mess = "Warning, adding " + key + " which is already in " + self._name
+            warn_mess = ("Warning, adding " + key + " which is already in "
+                         + self._name)
             print(warn_mess, sys.stderr)
         else:
             self._atom_list.append(key)
@@ -114,25 +116,49 @@ class Residual(dict):
         self._chain = chain
 
 
-    def provide_atom_num(self):
-        return self._chain.provide_atom_num()
+    def set_residual_num(self):
+        self._resNum = self._chain.provide_residual_num()
         
+
+    def write(self):
+        for atomtype in self.keys():
+            atom = self[atomtype]
+            atom.write(atomtype, self._name, self._resNum,
+                       self._chain.get_chain_ID())
 
         
 class Atom(object):
-    def __init__(self, x, y, z, identifier):
+    def __init__(self, x, y, z, identifier, symbol):
         self.x = x
         self.y = y
         self.z = z
-        self.identifier = identifier
+        self._identifier = identifier
         self._residual = None
-        self._atom_num = 0
+        self._symbol = symbol
 
     
     def set_residual(self, residual):
         self._residual = residual
 
-        
-    def set_atom_num(self):
-        self._atom_num = self_residual.provide_atom_num()
-        
+         
+    def write(self, atomtype, resName, resSeq, chain_ID):
+        out = "ATOM  "
+        out += (" " * 5 + str(self._identifier))[-5:] # Atom serial number
+        out += "  "
+        out += (atomtype + " " * 4)[:4] # Atom name
+        out += " " # Alternate location indicator
+        out += (resName + " " * 3)[:3] # Residue name
+        out += "  "
+        out += chain_ID # chain identifier
+        out += (" " * 4 + str(resSeq))[-4:] # Residue sequence number
+        out += "   "
+        out += " " # Code for insertion of residues
+        out += (" " * 8 + "{0:.3f}".format(self.x))[-8:] # X coordiates
+        out += (" " * 8 + "{0:.3f}".format(self.y))[-8:] # Y coordiates
+        out += (" " * 8 + "{0:.3f}".format(self.z))[-8:] # Z coordiates
+        out += " " * 6 # Occupancy
+        out += " " * 6 # Temperature facotr
+        out += " " * 8
+        out += (" " * 2 + self._symbol)[-2:] # Element symbol (right justified)
+        out += " " # Charge
+        print(out)

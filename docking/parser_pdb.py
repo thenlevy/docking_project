@@ -21,7 +21,7 @@ def parse_pdb(infile):
         if line[0:4] == "ATOM":
             chain = line[21]
             if not chain in ret.keys():
-                ret[chain] = Chain()
+                ret[chain] = Chain(chain)
             curres = "%s"%(line[22:26]).strip()
             if not curres in ret[chain].keys():
                 resname = str.strip(line[17:20])
@@ -31,7 +31,8 @@ def parse_pdb(infile):
             y = float(line[38:46])
             z = float(line[46:54])
             identifer = line[6:11].strip()
-            ret[chain][curres].add_atom(atomtype, Atom(x, y, z, identifer))
+            symbol = line[76:78].strip()
+            ret[chain][curres].add_atom(atomtype, Atom(x, y, z, identifer, symbol))
 
     return ret
             
