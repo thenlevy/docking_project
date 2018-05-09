@@ -201,6 +201,11 @@ class Atom(object):
     def set_residual_context(self, res_name, atom_type):
         self._context = {"residue": res_name, "atom_type": atom_type}
 
+
+    def get_context:
+        return self._context
+
+    
     def getCoord(self):
         out = []
         out.append(self.x) # X coordiates
