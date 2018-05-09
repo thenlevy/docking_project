@@ -31,6 +31,12 @@ class Pdb(dict):
         for chain in self.values():
             chain.write()
 
+    def getCA(self):
+        out = []
+        for chain in self.values():
+            out += chain.getCA()
+        return out
+
 
 class Chain(dict):
     def __init__(self, name=""):
@@ -76,6 +82,11 @@ class Chain(dict):
         for res in self.values():
             res.write()
 
+    def getCA(self):
+        out = []
+        for res in self.values():
+            out += res.getCA()
+        return out
 
     def get_chain_ID(self):
         return self._name
@@ -126,6 +137,12 @@ class Residual(dict):
             atom.write(atomtype, self._name, self._resNum,
                        self._chain.get_chain_ID())
 
+    def getCA(self):
+        out = []
+        atom = self['CA']
+        out+=atom.getCoord()
+        return out
+
         
 class Atom(object):
     def __init__(self, x, y, z, identifier, symbol):
@@ -162,3 +179,11 @@ class Atom(object):
         out += (" " * 2 + self._symbol)[-2:] # Element symbol (right justified)
         out += " " # Charge
         print(out)
+
+    def getCoord(self):
+        out = []
+        out.append(self.x) # X coordiates
+        out.append(self.y) # Y coordiates
+        out.append(self.z) # Z coordiates
+        return out
+
