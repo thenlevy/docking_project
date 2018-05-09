@@ -38,6 +38,14 @@ class Pdb(dict):
         return out
 
 
+    def get_atom_list(self):
+        ret = []
+        for c in chain:
+            ret += c.get_atom_list()
+        
+    
+
+
 class Chain(dict):
     def __init__(self, name=""):
         super().__init__()
@@ -90,6 +98,12 @@ class Chain(dict):
 
     def get_chain_ID(self):
         return self._name
+
+
+    def get_atom_list(self):
+        ret = []
+        for r in _residual_list:
+            ret += r.keys()
             
 
 class Residual(dict):
@@ -108,6 +122,7 @@ class Residual(dict):
             print(warn_mess, sys.stderr)
         else:
             self._atom_list.append(key)
+            value.set_residual_context(self._name, key)
         super().__setitem__(key, value)
 
 
@@ -152,6 +167,7 @@ class Atom(object):
         self._identifier = identifier
         self._residual = None
         self._symbol = symbol
+        self._context = None
 
     
     def set_residual(self, residual):
@@ -162,9 +178,9 @@ class Atom(object):
         out = "ATOM  "
         out += (" " * 5 + str(self._identifier))[-5:] # Atom serial number
         out += "  "
-        out += (atomtype + " " * 4)[:4] # Atom name
+        out += (self._context["atom_type"] + " " * 4)[:4] # Atom name
         out += " " # Alternate location indicator
-        out += (resName + " " * 3)[:3] # Residue name
+        out += (self._context["residue"] + " " * 3)[:3] # Residue name
         out += "  "
         out += chain_ID # chain identifier
         out += (" " * 4 + str(resSeq))[-4:] # Residue sequence number
@@ -180,6 +196,11 @@ class Atom(object):
         out += " " # Charge
         print(out)
 
+
+
+    def set_residual_context(self, res_name, atom_type):
+        self._context = {"residue": res_name, "atom_type": atom_type}
+
     def getCoord(self):
         out = []
         out.append(self.x) # X coordiates
@@ -187,3 +208,6 @@ class Atom(object):
         out.append(self.z) # Z coordiates
         return out
 
+
+    def get_residue():
+        return self._residual
