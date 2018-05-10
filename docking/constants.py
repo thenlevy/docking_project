@@ -8,7 +8,7 @@ dcharge["GLY"]["H"] = 0.2719
 dcharge["GLY"]["HA2"] = 0.0698
 dcharge["GLY"]["HA3"] = 0.0698
 
-charge["ALA"] = {}
+dcharge["ALA"] = {}
 dcharge["ALA"]["N"] = -0.4157
 dcharge["ALA"]["CA"] = 0.0337
 dcharge["ALA"]["C"] = 0.5973

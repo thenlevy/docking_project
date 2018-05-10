@@ -40,8 +40,9 @@ class Pdb(dict):
 
     def get_atom_list(self):
         ret = []
-        for c in chain:
+        for c in self.values():
             ret += c.get_atom_list()
+        return ret
         
     
 
@@ -102,8 +103,9 @@ class Chain(dict):
 
     def get_atom_list(self):
         ret = []
-        for r in _residual_list:
-            ret += r.keys()
+        for r in self.values():
+            ret += r.values()
+        return ret
             
 
 class Residual(dict):
@@ -128,6 +130,7 @@ class Residual(dict):
 
     def add_atom(self, atomtype, atom):
         self.__setitem__(atomtype, atom)
+        atom.set_residual(self)
 
 
     def keys(self):
@@ -202,7 +205,12 @@ class Atom(object):
         self._context = {"residue": res_name, "atom_type": atom_type}
 
 
-    def get_context:
+    def get_context(self):
+        if self._context["residue"] == "HIS":
+            if  "HD1" in self._residual.keys():
+                self._context["residue"] = "HID"
+            else:
+                self._context["residue"] = "HIE"
         return self._context
 
     
@@ -214,5 +222,5 @@ class Atom(object):
         return out
 
 
-    def get_residue():
+    def get_residue(self):
         return self._residual
