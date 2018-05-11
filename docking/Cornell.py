@@ -22,7 +22,10 @@ class Cornell_calc(object):
 
     def __init__(self, pdb):
         self.pdf = pdb
-        self.atom = pdb.get_atom_list()     
+        self.atom = pdb.get_atom_list()
+        self.epsilon = {}
+        self.q = {}
+        self.r = {}
  
     def get_Eij(self, i, j):
         """Return the free term Eij in the Cornell equation."""
@@ -32,7 +35,7 @@ class Cornell_calc(object):
         dist = self.get_dist(i, j)
         qi = self.get_q(i)
         qj = self.get_q(j)
-        return Aij / (dist ** 8) - Bij / (dist ** 6) + f * qi * qj / (20 * dist)     
+        return Aij / (dist ** 8) - Bij / (dist ** 6) + self.const_f * qi * qj / (20 * dist)     
  
     def get_Aij(self, i, j):
         """Return the free term Aij in the Cornell equation."""
@@ -54,6 +57,12 @@ class Cornell_calc(object):
 
     def get_epsilon(self, i):
         """Return the espsilon term for atom i."""
+        if i not in self.epsilon:
+            self.epsilon[i] = None
+            self.epsilon[i] = self.get_epsilon(i)
+        elif self.epsilon[i] != None:
+            return self.epsilon[i]
+        
         atomi = self.atom[i].get_context()["atom_type"]
         res_type = self.atom[i].get_context()["residue"]
         if self.is_nter(i):
@@ -89,6 +98,12 @@ class Cornell_calc(object):
               
     def get_q(self, i):
         """Return the charge of atom i."""
+        if i not in self.q:
+            self.q[i] = None
+            self.q[i] = self.get_q(i)
+        elif self.q[i] != None:
+            return self.q[i]
+
         atomi = self.atom[i].get_context()["atom_type"]
         res_type = self.atom[i].get_context()["residue"]
         if self.is_nter(i):
@@ -123,6 +138,12 @@ class Cornell_calc(object):
 
     def get_r(self, i):
         """Return the Van der Wals radius of atom i."""
+        if i not in self.r:
+            self.r[i] = None
+            self.r[i] = self.get_r(i)
+        elif self.r[i] != None:
+            return self.r[i]
+
         atomi = self.atom[i].get_context()["atom_type"]
         res_type = self.atom[i].get_context()["residue"]    
         if self.is_nter(i):
@@ -169,3 +190,38 @@ class Cornell_calc(object):
             return False    
         residue = self.atom[i].get_residue()
         return "OXT" in residue.keys()    
+
+
+def comp_score(receptor_file, ligand_file):
+    """Compute the Cornell score for a docking configuration."""
+
+    # Parse the two files
+    pdb_receptor = parse_pdb(receptor_file)
+    pdb_ligand = parse_pdb(ligand_file)
+
+    # Create a pdb object for the docking
+    pdb_docking = Pdb()
+    for chainID in pdb_receptor.keys():
+        pdb_docking.add_chain("R" + chainID, pdb_receptor[chainID])
+    for chainID in pdb_ligand.keys():
+        pdb_docking.add_chain("L" + chainID, pdb_ligand[chainID])
+
+    # Create the Cornell ojbect for the docking
+    cornell_dock = Cornell_calc(pdb_docking)
+
+    # Split the list of atom's index between ligand and receptor
+    last_receptor = len(pdb_receptor.get_atom_list())
+    last_ligand = len(pdb_ligand.get_atom_list())
+    receptor_idx = range(last_receptor)
+    ligand_idx = range(last_receptor, last_receptor + last_ligand)
+
+    #compute the score
+    score = 0
+    for i in receptor_idx:
+        for j in ligand_idx:
+            score += cornell_dock.get_Eij(i, j)
+
+    return score
+
+
+
