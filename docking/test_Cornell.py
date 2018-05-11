@@ -19,3 +19,23 @@ for chain in official["chains"]:
             if atom["epsilon"] != test.get_epsilon(id_at):
                 print (curres, official[chain][curres]["resname"], atomtype, "epsilon")
                 print(id_at)
+
+official = None
+official = preparePDB("../data/Lig_natif.pdb", "D")
+test = Cornell_calc(parse_pdb("../data/Lig_natif.pdb"))
+id_at = 0
+for chain in official["chains"]:
+    for curres in official[chain]["reslist"]:
+        for atomtype in official[chain][curres]["atomlist"]:
+            atom = official[chain][curres][atomtype]
+            if atom["charge"] != test.get_q(id_at):
+                print (curres, official[chain][curres]["resname"], atomtype, "charge")
+                print(id_at)
+            if atom["vdw"] != test.get_r(id_at):
+                print (curres, official[chain][curres]["resname"], atomtype, "vdw")
+                print(id_at)
+            if atom["epsilon"] != test.get_epsilon(id_at):
+                print (curres, official[chain][curres]["resname"], atomtype, "epsilon")
+                print(id_at)
+                assert(False)
+            id_at += 1
