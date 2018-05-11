@@ -1,4 +1,4 @@
-from Protein import Atom, Residual, Chain, Pdb
+from Protein import Atom, Residue, Chain, Pdb
 
 def parse_pdb(infile):
     """
@@ -25,7 +25,7 @@ def parse_pdb(infile):
             curres = "%s"%(line[22:26]).strip()
             if not curres in ret[chain].keys():
                 resname = str.strip(line[17:20])
-                ret[chain].add_residual(curres, Residual(resname))
+                ret[chain].add_residue(curres, Residue(resname))
             atomtype = str.strip(line[12:16])
             x = float(line[30:38])
             y = float(line[38:46])

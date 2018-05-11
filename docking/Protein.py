@@ -1,4 +1,10 @@
 class Pdb(dict):
+    """
+    Represent a complete protein.
+    
+    This class can be used as a dictionary, that maps chain identifier to
+    chain objects.
+    """
     def __init__(self, name="pdb"):
         super().__init__()
         self._name = name
@@ -16,22 +22,29 @@ class Pdb(dict):
 
 
     def add_chain(self, chain_name, chain):
+        """Add a chain object to the protein."""
         self.__setitem__(chain_name, chain)
 
 
     def keys(self):
+        """Return the list of chain identifiers."""
         return self._chains
 
     
     def values(self):
+        """Return the list of chain objects."""
         return [self[k] for k in self._chains]
 
 
+
     def write(self):
+        """Call successively the `write` method of all chain objects."""
         for chain in self.values():
             chain.write()
 
     def getCA(self):
+        """Return the list of atom objects corresponding to the alpha carbon of
+        all the residues."""
         out = []
         for chain in self.values():
             out += chain.getCA()
@@ -39,6 +52,8 @@ class Pdb(dict):
 
 
     def get_atom_list(self):
+        """Return a list of atom objects representing all the atoms of the
+        protein."""
         ret = []
         for c in self.values():
             ret += c.get_atom_list()
@@ -48,67 +63,88 @@ class Pdb(dict):
 
 
 class Chain(dict):
+    """
+    Represent a chain of a protein.
+
+    This class can be used as a dictionary that maps residue identifier to 
+    Residue object.
+    """
     def __init__(self, name=""):
         super().__init__()
-        self._residual_list = []
+        self._residue_list = []
         self._name = name
         self._nb_atom = 0
         self._pdb = None
 
     def __setitem__(self, key, value):
-        if key in self._residual_list:
+        if key in self._residue_list:
             warn_mess = ("Warning, adding " + key + " which is already in "
                          + self._name)
             print(warn_mess, sys.stderr)
         else:
-            self._residual_list.append(key)
+            self._residue_list.append(key)
         super().__setitem__(key, value)
 
 
-    def add_residual(self, res_name, res):
+    def add_residue(self, res_name, res):
+        """Add a residue object to the chain."""
         self.__setitem__(res_name, res)
         res.set_chain(self)
-        res.set_residual_num()
+        res.set_residue_num()
     
 
     def keys(self):
-        return self._residual_list
+        """Return the list of residue identifiers."""
+        return self._residue_list
 
 
     def values(self):
-        return [self[k] for k in self._residual_list]
+        """Return the list of residue objects."""
+        return [self[k] for k in self._residue_list]
 
 
     def set_pdb(self, pdb):
+        """Specify the Pdb object to which the chain belongs."""
         self._pdb = pdb
 
 
-    def provide_residual_num(self):
+    def provide_residue_num(self):
+        """Provide a unique number to a residue object."""
         self._nb_atom += 1
         return self._nb_atom
 
     def write(self):
+        """Call successively the `write` method of all Residue objects."""
         for res in self.values():
             res.write()
 
     def getCA(self):
+        """Return the list of atom objects reprensenting the alpha carbon of all
+        the chain's residues"""
         out = []
         for res in self.values():
             out += res.getCA()
         return out
 
     def get_chain_ID(self):
+        """Return the identifier of the chain."""
         return self._name
 
 
     def get_atom_list(self):
+        """Return the list of the atom objects representing all the atom
+        contained in the chain."""
         ret = []
         for r in self.values():
             ret += r.values()
         return ret
             
 
-class Residual(dict):
+class Residue(dict):
+    """Represent a residue.
+
+    This class can be used as a dictionary maping atom identifiers to atom objects.
+    """
     def __init__(self, name=""):
         super().__init__()
         self._atom_list = []
@@ -124,38 +160,45 @@ class Residual(dict):
             print(warn_mess, sys.stderr)
         else:
             self._atom_list.append(key)
-            value.set_residual_context(self._name, key)
+            value.set_residue_context(self._name, key)
         super().__setitem__(key, value)
 
 
     def add_atom(self, atomtype, atom):
+        """Add an atom object."""
         self.__setitem__(atomtype, atom)
-        atom.set_residual(self)
+        atom.set_residue(self)
 
 
     def keys(self):
+        """Return the list of atom identifier."""
         return self._atom_list
 
 
     def values(self):
+        """Return the list of atom objects."""
         return [self[k] for k in self._atom_list]
 
 
     def set_chain(self, chain):
+        """Specify the chain to which to residue belongs."""
         self._chain = chain
 
 
-    def set_residual_num(self):
-        self._resNum = self._chain.provide_residual_num()
+    def set_residue_num(self):
+        """Get the number of the residue in its chain."""
+        self._resNum = self._chain.provide_residue_num()
         
 
     def write(self):
+        """Successively call the `write` method of all atom objects."""
         for atomtype in self.keys():
             atom = self[atomtype]
             atom.write(atomtype, self._name, self._resNum,
                        self._chain.get_chain_ID())
 
     def getCA(self):
+        """Return the atom object representing the alpha carbon of the residue."""
         out = []
         atom = self['CA']
         out+=atom.getCoord()
@@ -163,21 +206,24 @@ class Residual(dict):
 
         
 class Atom(object):
+    """Represent an atom."""
     def __init__(self, x, y, z, identifier, symbol):
         self.x = x
         self.y = y
         self.z = z
         self._identifier = identifier
-        self._residual = None
+        self._residue = None
         self._symbol = symbol
         self._context = None
 
     
-    def set_residual(self, residual):
-        self._residual = residual
+    def set_residue(self, residue):
+        """Specify the chain to which the atom belongs."""
+        self._residue = residue
 
          
     def write(self, atomtype, resName, resSeq, chain_ID):
+        """Print the pdb reprensentation of the atom."""
         out = "ATOM  "
         out += (" " * 5 + str(self._identifier))[-5:] # Atom serial number
         out += "  "
@@ -201,13 +247,15 @@ class Atom(object):
 
 
 
-    def set_residual_context(self, res_name, atom_type):
+    def set_residue_context(self, res_name, atom_type):
+        """Provide information about the residue to which the atom belongs."""
         self._context = {"residue": res_name, "atom_type": atom_type}
 
 
     def get_context(self):
+        """Return information about the residue to which the atom belongs."""
         if self._context["residue"] == "HIS":
-            if  "HD1" in self._residual.keys():
+            if  "HD1" in self._residue.keys():
                 self._context["residue"] = "HID"
             else:
                 self._context["residue"] = "HIE"
@@ -215,6 +263,7 @@ class Atom(object):
 
     
     def getCoord(self):
+        """Return the coordonates of the atom."""
         out = []
         out.append(self.x) # X coordiates
         out.append(self.y) # Y coordiates
@@ -223,4 +272,5 @@ class Atom(object):
 
 
     def get_residue(self):
-        return self._residual
+        """Return the Residue to which the Atom belongs."""
+        return self._residue
