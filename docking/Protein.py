@@ -1,3 +1,4 @@
+from numpy import sqrt
 class Pdb(dict):
     """
     Represent a complete protein.
@@ -57,9 +58,8 @@ class Pdb(dict):
         ret = []
         for c in self.values():
             ret += c.get_atom_list()
-        return ret
-        
-    
+        return ret 
+
 
 
 class Chain(dict):
@@ -204,6 +204,25 @@ class Residue(dict):
         out+=atom.getCoord()
         return out
 
+    def get_mass_center(self):
+        """Return the coordonates of the center of mass of the residue.
+
+        The weight of the atoms are not taken into consideration.
+        """
+        x_center = 0
+        y_center = 0
+        z_center = 0
+        for atom in self.values():
+            x, y, z = atom.getCoord()
+            x_center += x
+            y_center += y
+            z_center += z
+        nb_atom = len(self.values())
+        x_center /= nb_atom
+        y_center /= nb_atom
+        z_center /= nb_atom
+        return (x_center, y_center, z_center)
+
         
 class Atom(object):
     """Represent an atom."""
@@ -274,3 +293,25 @@ class Atom(object):
     def get_residue(self):
         """Return the Residue to which the Atom belongs."""
         return self._residue
+
+
+def distance_residues(r1, r2):
+    """Return the distance between two residues."""
+
+    center_1 = r1.get_mass_center()
+    center_2 = r2.get_mass_center()
+    return sqrt(sum(map(lambda t: (t[0] - t[1])**2, zip(center_1, center_2))))
+
+
+def interface(chain1, chain2):
+    """Return the list of keys of residuals at the interface of chain1 and
+    chain2."""
+    dist_max = 6
+    idx_chain1 = set()
+    idx_chain2 = set()
+    for k1 in chain1.keys():
+        for k2 in chain2.keys():
+            if distance_residues(chain1[k1], chain2[k2]) < dist_max:
+                idx_chain1.add(k1)
+                idx_chain2.add(k2)
+    return (idx_chain1, idx_chain2)

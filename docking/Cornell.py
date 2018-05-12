@@ -81,7 +81,6 @@ class Cornell_calc(object):
             else:
                 return  depsilon[res_type][atomi]     
         elif self.is_cter(i):
-            atomi = atom[i].get_context()["atom_type"]
             if atomi == "CA" :
                 return 0.1094     
             elif atomi == "C" :
