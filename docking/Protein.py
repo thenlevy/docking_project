@@ -1,4 +1,3 @@
-from numpy import sqrt
 class Pdb(dict):
     """
     Represent a complete protein.
@@ -300,7 +299,7 @@ def distance_residues(r1, r2):
 
     center_1 = r1.get_mass_center()
     center_2 = r2.get_mass_center()
-    return sqrt(sum(map(lambda t: (t[0] - t[1])**2, zip(center_1, center_2))))
+    return (sum(map(lambda t: (t[0] - t[1])**2, zip(center_1, center_2))))**0.5
 
 
 def interface(chain1, chain2):
