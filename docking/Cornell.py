@@ -41,7 +41,7 @@ class Cornell_calc(object):
         """Return the free term Aij in the Cornell equation."""
         epsilon_ij = (self.get_epsilon(i) * self.get_epsilon(j))**0.5
         r_ij  = self.get_r(i) + self.get_r(j)
-        return epsilon_ij * (r_ij ** 12)     
+        return epsilon_ij * (r_ij ** 8)     
 
     def get_Bij(self, i, j):
         """Return the free term Bij in the Cornell equation."""
