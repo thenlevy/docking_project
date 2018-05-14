@@ -42,12 +42,19 @@ class Pdb(dict):
         for chain in self.values():
             chain.write()
 
-    def getCA(self):
+    def get_CA(self):
         """Return the list of atom objects corresponding to the alpha carbon of
         all the residues."""
         out = []
         for chain in self.values():
-            out += chain.getCA()
+            out += chain.get_CA()
+        return out
+
+    def get_CA_Elems(self, list):
+
+        out = []
+        for chain in self.values():
+            out += chain.get_CA_Elems(list)
         return out
 
 
@@ -117,12 +124,20 @@ class Chain(dict):
         for res in self.values():
             res.write()
 
-    def getCA(self):
+    def get_CA_Elems(self, list):
+        """Return the list of atom objects reprensenting the alpha carbon of the specified
+        chain's residues"""
+        out = []
+        for l in list:
+            out += self.get(self._residue_list[l]).get_CA()
+        return out
+
+    def get_CA(self):
         """Return the list of atom objects reprensenting the alpha carbon of all
         the chain's residues"""
         out = []
         for res in self.values():
-            out += res.getCA()
+            out += res.get_CA()
         return out
 
     def get_chain_ID(self):
@@ -196,7 +211,7 @@ class Residue(dict):
             atom.write(atomtype, self._name, self._resNum,
                        self._chain.get_chain_ID())
 
-    def getCA(self):
+    def get_CA(self):
         """Return the atom object representing the alpha carbon of the residue."""
         out = []
         atom = self['CA']

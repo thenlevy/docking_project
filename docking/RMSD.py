@@ -3,7 +3,8 @@ import parser_pdb as pdb
 import sys
 
 file1 = sys.argv[1]
-file2 = sys.argv[2]
+#file2 = sys.argv[2]
+#file3 = sys.argv[3]
 
 
 # calcule le rmsd a partir d'une liste de distance entre atomes
@@ -20,14 +21,44 @@ def distances(CA1, CA2):
 
 
 
-######## Ex d'Utilisation
+def rmsdLigant(file_Ligand_Natif, file_Ligand_Soluce):
 
-#PDB1 = pdb.parse_pdb(file1)
-#PDB2 = pdb.parse_pdb(file2)
-#coordCa1 = PDB1.getCA()
-#coordCa2 = PDB2.getCA()
-#distances = distances(coordCa1, coordCa2)
-#print(rmsd(distances))
+	PDB1 = pdb.parse_pdb(file_Ligand_Natif)
+	PDB2 = pdb.parse_pdb(file_Ligand_Soluce)
+	coordCa1 = PDB1.get_CA()
+	coordCa2 = PDB2.get_CA()
+	distance = distances(coordCa1, coordCa2)
+	return rmsd(distance)
+
+def rmsdComplexe(file_Ligand_Natif, file_Ligand_Soluce, file_Rec_Natif):
+
+	PDB1 = pdb.parse_pdb(file_Ligand_Natif)
+	PDB2 = pdb.parse_pdb(file_Ligand_Soluce)
+	PDB_REC = pdb.parse_pdb(file_Rec_Natif)
+	coordCa_Ligand_Natif = PDB1.get_CA()
+	coordCa_Ligand_Soluce = PDB2.get_CA()
+	coordCa_REC = PDB_REC.get_CA()
+	complexe = coordCa_REC + coordCa_Ligand_Natif
+	solution = coordCa_REC + coordCa_Ligand_Soluce
+	distance = distances(complexe, solution)
+	return rmsd(distance)
+
+def rmsdInterface(file_Ligand_Natif, file_Ligand_Soluce, listeIndices):
+
+	PDB1 = pdb.parse_pdb(file_Ligand_Natif)
+	PDB2 = pdb.parse_pdb(file_Ligand_Soluce)
+	coord1 = PDB1.get_CA_Elems(listeIndices)
+	coord2 = PDB1.get_CA_Elems(listeIndices)
+	distanceMatrix = distances(coord2, coord2)
+	return rmsd(distanceMatrix)
+
+
+
+# liste = [0,56] affichera le premier et le 57e element 
+
+
+
+
 
 
 
