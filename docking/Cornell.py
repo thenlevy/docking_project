@@ -5,7 +5,7 @@ from parser_pdb import parse_pdb
 
 """
 According to Cronell, 95,
-Aij =  epsilon_ij* R_ij*^12
+Aij =  epsilon_ij* R_ij*^8
 B_ij = 2epsilon_ij* . R_ij*^6
 R_ij* = Ri* + Rj*
 with R* VdW Radius
