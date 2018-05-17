@@ -320,7 +320,7 @@ def distance_residues(r1, r2):
 def interface(chain1, chain2):
     """Return the list of keys of residuals at the interface of chain1 and
     chain2."""
-    dist_max = 6
+    dist_max = 7
     idx_chain1 = set()
     idx_chain2 = set()
     for k1 in chain1.keys():
